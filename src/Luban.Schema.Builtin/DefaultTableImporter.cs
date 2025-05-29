@@ -33,6 +33,17 @@ public class DefaultTableImporter : ITableImporter
             {
                 continue;
             }
+
+            var realPath = file.Replace('\\', '/');
+            s_logger.Info("realPath {} file {}" ,realPath,file);
+            bool isExcluded = GenerationContext.GlobalConf.ExcludeDirs.Any(excludeDir =>
+                realPath.StartsWith(excludeDir, StringComparison.OrdinalIgnoreCase));
+            if (isExcluded)
+            {
+                s_logger.Info("ingnore file {}",  file);
+
+                continue;
+            }
             string fileName = Path.GetFileName(file);
             string ext = Path.GetExtension(fileName).TrimStart('.');
             if (!excelExts.Contains(ext))

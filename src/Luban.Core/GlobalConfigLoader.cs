@@ -55,11 +55,12 @@ public class GlobalConfigLoader : IConfigLoader
         public List<Target> Targets { get; set; }
 
         public List<string> Xargs { get; set; }
+        public List<string> ExcludeDirs { get; set; }
     }
 
     public LubanConfig Load(string fileName)
     {
-        s_logger.Debug("load config file:{}", fileName);
+        s_logger.Info("load config file:{}", fileName);
         _curDir = Directory.GetParent(fileName).FullName;
 
         var options = new JsonSerializerOptions
@@ -91,6 +92,21 @@ public class GlobalConfigLoader : IConfigLoader
                 importFiles.Add(new SchemaFileInfo() { FileName = subFile, Type = schemaFile.Type });
             }
         }
+
+        List<string> excludeList = new List<string>();
+        if (globalConf.ExcludeDirs != null)
+        {
+            foreach (var excludeDir in globalConf.ExcludeDirs)
+            {
+                string excludePath = Path.Combine(_curDir, excludeDir).Replace(Path.DirectorySeparatorChar, '/');
+                s_logger.Info("exclude ptah {}", excludePath);
+                if (!Directory.Exists(excludePath))
+                {
+                    throw new Exception($"failed to load config file:'{fileName}': exclude directory doesn't exists: {excludePath}");
+                }
+                excludeList.Add(excludePath);
+            }
+        }
         return new LubanConfig()
         {
             ConfigFileName = configFileName,
@@ -99,6 +115,7 @@ public class GlobalConfigLoader : IConfigLoader
             Targets = targets,
             Imports = importFiles,
             Xargs = globalConf.Xargs,
+            ExcludeDirs = excludeList
         };
     }
 

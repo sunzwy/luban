@@ -12,6 +12,7 @@ public class LubanConfig
     public List<SchemaFileInfo> Imports { get; set; }
 
     public List<string> Xargs { get; set; }
-
+    public List<string> ExcludeDirs { get; set; }
+    
     public string InputDataDir { get; set; }
 }
